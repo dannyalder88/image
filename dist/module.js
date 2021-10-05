@@ -275,7 +275,14 @@ function setupStaticGeneration(nuxt, options) {
   });
   nuxt.hook("generate:done", async () => {
     const limit = pLimit__default['default'](8);
-    const downloads = Object.entries(staticImages).map(([url, name]) => {
+    const excludedImages = await nuxt.options.image.excludeImages();
+    const downloads = Object.entries(staticImages).filter(([_, name]) => {
+      if (excludedImages.includes(name)) {
+        logger.success("Skipped excluded image " + name);
+        return false;
+      }
+      return true;
+    }).map(([url, name]) => {
       if (!ufo.hasProtocol(url)) {
         url = ufo.joinURL(options.internalUrl, url);
       }
@@ -2380,7 +2387,8 @@ const imageModule = async function imageModule2(moduleOptions) {
     },
     internalUrl: "",
     providers: {},
-    static: {}
+    static: {},
+    excludeImages: () => new Promise((resolve2) => resolve2([]))
   };
   const options = defu__default['default'](moduleOptions, nuxt.options.image, defaults);
   options.provider = detectProvider(options.provider, nuxt.options.target === "static");
