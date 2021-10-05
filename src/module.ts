@@ -29,7 +29,8 @@ const imageModule: Module<ModuleOptions> = async function imageModule (moduleOpt
     },
     internalUrl: '',
     providers: {},
-    static: {}
+    static: {},
+    excludeImages: () => new Promise(resolve => resolve([]))
   }
 
   const options: ModuleOptions = defu(moduleOptions, nuxt.options.image, defaults)

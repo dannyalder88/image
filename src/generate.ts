@@ -36,7 +36,15 @@ export function setupStaticGeneration (nuxt: any, options: ModuleOptions) {
 
   nuxt.hook('generate:done', async () => {
     const limit = pLimit(8)
-    const downloads = Object.entries(staticImages).map(([url, name]) => {
+    const excludedImages = await nuxt.options.image.excludeImages()
+    const downloads = Object.entries(staticImages).filter(([_, name]) => {
+      if (excludedImages.includes(name)) {
+        logger.success('Skipped excluded image ' + name)
+        return false
+      }
+
+      return true
+    }).map(([url, name]) => {
       if (!hasProtocol(url)) {
         url = joinURL(options.internalUrl, url)
       }
